@@ -1,5 +1,10 @@
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from src.routing import CWSRouting
-import src.util as util
+from src import util
 
 
 def test_routing():

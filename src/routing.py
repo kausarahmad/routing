@@ -1,4 +1,9 @@
-import util
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src import util
 from typing import Dict, Any, List
 
 
@@ -16,44 +21,44 @@ class CWSRouting:
     def limit_number_of_pickups(self, merged_route: List[int]):
         '''If the merged route contains more than max_pickups_in_route, remove the new pickup from the route'''
         pickups_count = 0
-        for event_ix in merged_route:
-            if self.events[event_ix].get('pickup_nr'):
+        for event_index in merged_route:
+            if self.events[event_index].get('pickup_nr'):
                 pickups_count += 1
                 if pickups_count > self.max_pickups_in_route:
-                    merged_route.remove(event_ix)
+                    merged_route.remove(event_index)
                     break
         return merged_route, pickups_count
 
-    def validate_route_volume_with_pickup(self, merged_route: List[int], total_deliveries_volume: float):
+    def validate_route_volume_with_pickup(self, merged_route: List[int], total_deliveries_volume: float) -> bool:
         '''Check if the total volume of the vehicle used at every event is less than or equal to the vehicle capacity'''
         remaining_volume = total_deliveries_volume
         is_within_capacity = True
-        for event_ix in merged_route:
+        for event_index in merged_route:
             # if delivery event, subtract load after dropoff
-            if self.events[event_ix].get('delivery_nr'):
-                remaining_volume -= self.events[event_ix]['volume']
+            if self.events[event_index].get('delivery_nr'):
+                remaining_volume -= self.events[event_index]['volume']
             # if pickup event, add load after pickup
             else:
-                remaining_volume += self.events[event_ix]['volume']
+                remaining_volume += self.events[event_index]['volume']
             # check if total load is less than vehicle capacity after pickup event
             if remaining_volume > self.vehicle_capacity:
                 is_within_capacity = False
                 break
         return is_within_capacity
 
-    def get_total_volume(self, route: List[int]):
+    def get_total_volume(self, route: List[int]) -> float:
         '''Get the total volume of the vehicle when deliveries are loaded onto it'''
-        volume = 0
-        for event_ix in route:
-            if self.events[event_ix].get('delivery_nr'):
-                volume += self.events[event_ix]['volume']
+        volume = 0.0
+        for event_index in route:
+            if self.events[event_index].get('delivery_nr'):
+                volume += self.events[event_index]['volume']
         return volume
 
-    def calculate_savings(self, i: int, j: int):
+    def calculate_savings(self, i: int, j: int) -> float:
         '''Calculate the savings of merging events i and j into one route vs delivering them individually'''
         return self.durations_matrix[0][i] + self.durations_matrix[0][j] - self.durations_matrix[i][j]
 
-    def run_clarke_wright_savings_with_pickup(self):
+    def run_clarke_wright_savings_with_pickup(self) -> List[List[int]]:
         num_events = len(self.events)
         savings_matrix = [[0] * num_events for _ in range(num_events)]
 
@@ -97,7 +102,7 @@ class CWSRouting:
 
         return routes
 
-    def build_routes_map_file(self, routes, display_log=False):
+    def build_routes_map_file(self, routes: List[List[int]], display_log: bool=False) -> List[Dict[str, Any]]:
         routes_descriptive = []
         for route in routes:
             # exclude solitary pickup event routes

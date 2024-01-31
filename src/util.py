@@ -10,7 +10,7 @@ import csv
 # define some params we will be using for the test run
 VEHICLE_CAPACITY = 3200000
 DA_VAN_SPEED = 30 # KM/H
-DEPOT = {'lat': 24.8953, 'lng': 55.059, 'volume': 0.0, 'delivery_nr': 'origin'}
+DEPOT = {'lat': 24.919762580554334, 'lng': 55.122473893638016, 'volume': 0.0, 'delivery_nr': 'origin'}
 OSRM_URL = 'https://router.project-osrm.org'
 MAX_PICKUPS_IN_ROUTE = 1
 
